@@ -22,6 +22,93 @@ matrix:
   include:
     # Common
     - env: COMMAND=clang-test
+      arch: arm64
+	  script:
+        - curl -sSL "http://apt.llvm.org/llvm-snapshot.gpg.key" | sudo -E apt-key add -;
+        - echo "deb http://apt.llvm.org/$TRAVIS_DIST/ llvm-toolchain-$TRAVIS_DIST-8 main" | sudo tee -a /etc/apt/sources.list > /dev/null;
+        - sudo -E apt-get -yq update >> ~/apt-get-update.log 2>&1;
+        - sudo -E apt-get -yq --no-install-suggests --no-install-recommends install diffstat clang-format-8 || travis_terminate 1
+        - wget https://llvm.org/svn/llvm-project/cfe/trunk/tools/clang-format/clang-format-diff.py || travis_terminate 1
+        - chmod a+x clang-format-diff.py
+        - git diff -U0 --no-color HEAD^1 *.c *.cc *.cpp *.h *.hpp *.i *.ic *.ih | ./clang-format-diff.py -binary=clang-format-8 -style=file -p1 >_GIT_DIFF
+        - '[ ! -s _GIT_DIFF ] && { echo The last git commit is clang-formatted; travis_terminate 0; } || { diffstat _GIT_DIFF; echo; cat _GIT_DIFF; travis_terminate 1; }'
+
+
+    # Configurations for developers' forks and after merging a pull request for percona/percona-server
+    # 1
+    - if: repo != percona/percona-server OR repo = percona/percona-server AND type IN (push, cron)
+      arch: arm64
+	  env:              BUILD=Debug
+      compiler: clang
+      os: osx
+      osx_image: xcode11
+    # 2
+    - if: repo != percona/percona-server OR repo = percona/percona-server AND type IN (push, cron)
+      arch: arm64
+	  env: VERSION=10   BUILD=RelWithDebInfo
+      compiler: clang
+    # 3
+    - arch: arm64
+	  if: repo != percona/percona-server OR repo = percona/percona-server AND type IN (push, cron)
+      env: VERSION=9    BUILD=Debug
+      compiler: clang
+    # 4
+    - arch: arm64
+	  if: repo != percona/percona-server OR repo = percona/percona-server AND type IN (push, cron)
+      env: VERSION=8    BUILD=Debug
+      compiler: clang
+    # 5
+    - arch: arm64
+	  if: repo != percona/percona-server OR repo = percona/percona-server AND type IN (push, cron)
+      env: VERSION=7    BUILD=Debug
+      compiler: clang
+    # 6
+    - arch: arm64
+	  if: repo != percona/percona-server OR repo = percona/percona-server AND type IN (push, cron)
+      env: VERSION=6.0  BUILD=Debug
+      compiler: clang
+    # 7
+    - arch: arm64
+	  if: repo != percona/percona-server OR repo = percona/percona-server AND type IN (push, cron)
+      env: VERSION=5.0  BUILD=Debug
+      compiler: clang
+    # 8
+    - arch: arm64
+	  if: repo != percona/percona-server OR repo = percona/percona-server AND type IN (push, cron)
+      env: VERSION=4.0  BUILD=Debug
+      compiler: clang
+    # 9
+    - arch: arm64
+	  if: repo != percona/percona-server OR repo = percona/percona-server AND type IN (push, cron)
+      env: VERSION=10   BUILD=Debug
+      compiler: gcc
+    # 10
+    - arch: arm64
+	  if: repo != percona/percona-server OR repo = percona/percona-server AND type IN (push, cron)
+      env: VERSION=9    BUILD=Debug
+      compiler: gcc
+    # 11
+    - arch: arm64
+	  if: repo != percona/percona-server OR repo = percona/percona-server AND type IN (push, cron)
+      env: VERSION=8    BUILD=Debug
+      compiler: gcc
+    # 12
+    - arch: arm64
+	  if: repo != percona/percona-server OR repo = percona/percona-server AND type IN (push, cron)
+      env: VERSION=7    BUILD=Debug
+      compiler: gcc
+    # 13
+    - arch: arm64
+	  if: repo != percona/percona-server OR repo = percona/percona-server AND type IN (push, cron)
+      env: VERSION=6    BUILD=Debug
+      compiler: gcc
+    # 14
+    - arch: arm64
+	  if: repo != percona/percona-server OR repo = percona/percona-server AND type IN (push, cron)
+      env: VERSION=5    BUILD=Debug
+      compiler: gcc
+
+    - env: COMMAND=clang-test
       script:
         - curl -sSL "http://apt.llvm.org/llvm-snapshot.gpg.key" | sudo -E apt-key add -;
         - echo "deb http://apt.llvm.org/$TRAVIS_DIST/ llvm-toolchain-$TRAVIS_DIST-8 main" | sudo tee -a /etc/apt/sources.list > /dev/null;
